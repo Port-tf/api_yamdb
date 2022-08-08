@@ -50,3 +50,6 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+
+## тест внесения изменений VadimVolkovsky
