@@ -5,11 +5,11 @@ from api.views import *
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('posts', PostViewSet)
-router.register(r'posts/(?P<post_id>\d+)/comments',
+
+router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
                 CommentViewSet, basename='comments')
-router.register('groups', GroupViewSet)
-router.register('follow', FollowViewSet)
+router.register(r'titles/(?P<title_id>\d+)/reviews',
+                ReviewViewSet, basename='reviews')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
