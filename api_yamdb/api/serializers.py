@@ -8,13 +8,13 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GenreSerializer():
+class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = '__all__'
 
 
-class TitlesSerializer():
+class TitlesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Titles
         fields = '__all__'
