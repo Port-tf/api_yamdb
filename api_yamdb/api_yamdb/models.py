@@ -1,19 +1,15 @@
-from django.db import models
-from django.contrib.auth import get_user_model
 
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth import get_user_model
+from django.db import models
+
+# from django.core.validators import MaxValueValidator, MinValueValidator
 
 User = get_user_model()
 
 
 
 class Score(models.Model):
-    score = models.IntegerField(
-        validators=[MinValueValidator(limit_value=1),
-                    MaxValueValidator(limit_value=10)
-                    ],
-        default=0, null=True, blank=True
-    )
+    score = models.IntegerField(default=0, null=True, blank=True)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -22,7 +18,7 @@ class Score(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='scores'
+        related_name='reviews'
     )
     class Meta:
         unique_together = ('user', 'title')
