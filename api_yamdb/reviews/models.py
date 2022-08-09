@@ -1,18 +1,112 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
-from django.contrib.auth.models import AbstractUser
+from users.models import User
 
 
-CHOICES_ROLE = [
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin')
-]
+class Category(models.Model):
+    name = models.CharField('Имя категории', max_length=256)
+    slug = models.SlugField('Страница категории', unique=True, max_length=50)
 
-class User(AbstractUser):
-    username = models.CharField('Ник пользователя', unique=True, max_length=150)
-    email = models.EmailField('e-mail пользователя')
-    first_name = models.CharField('Имя пользователя', max_length=150)
-    last_name = models.CharField('Фамилия пользователя', max_length=150)
-    bio = models.TextField('Биография', blank=True)
-    role = models.CharField('Роль пользователя', default='user', max_length=50, choices=CHOICES_ROLE)
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    name = models.CharField('Жанр', max_length=256)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class Titles(models.Model):
+    name = models.CharField(max_length=100)
+    year = models.IntegerField()
+    description = models.TextField(blank=True)
+    genre = models.ManyToManyField(Genre, related_name='titles')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='titles'
+    )
+
+
+    def __str__(self):
+        return self.name
+
+
+# class Score(models.Model):
+#     score = models.IntegerField(
+#         validators=[MinValueValidator(limit_value=0),
+#                     MaxValueValidator(limit_value=10)
+#                     ],
+#         default=0
+#     )
+#     user = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         related_name='scores'
+#     )
+#     title = models.ForeignKey(
+#         Titles,
+#         on_delete=models.CASCADE,
+#         related_name='scores'
+#     )
+#     class Meta:
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['user', 'title'],
+#                 name='unique_user_title'
+#             )
+#         ]
+
+
+class Review(models.Model):
+    text = models.TextField(
+        'Текст отзыва',
+        help_text='Введите текст отзыва'
+    )
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    title = models.ForeignKey(
+        Titles,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    score = models.IntegerField(
+        validators=[
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=10)
+        ],
+    )
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Comments(models.Model):
+    text = models.TextField(
+        verbose_name='Текст комментария',
+        help_text='Введите текст комментария'
+    )
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
+    def __str__(self):
+        return self.text[:15]
