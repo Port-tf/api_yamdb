@@ -34,7 +34,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
     # permission_classes = #AdminOrReadOnly
-    pagination_class = 
+    # pagination_class = 
     filter_backends = (DjangoFilterBackend,)
     # по ТЗ (redoc) нужно фильтровать категорию и жанр по полю Slug
     # можно потестить вот так: category__slug и genre__slug
