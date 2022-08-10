@@ -7,11 +7,21 @@ from api.serializers import (UserSerializer, CategorySerializer, GenreSerializer
                              TitlesSerializer, ReviewSerializer, CommentSerializer)
 from users.models import User
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import action
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'username'
 
+    @action(methods=['patch', 'get'], detail=True)
+    def me(self, request):
+        user = User.objects.filter(
+            username=self.request.user.username
+        )
+        serializer = self.get_serializer(user)
+        serializer.save()
+        return serializer.data
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                     mixins.DestroyModelMixin, viewsets.GenericViewSet):
