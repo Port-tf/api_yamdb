@@ -1,4 +1,5 @@
 import datetime as dt
+from tkinter.tix import Tree
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -18,12 +19,24 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    
+
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class TitlesSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    
     class Meta:
         model = Titles
         fields = ('name', 'year', 'genre', 'category', 'description')
@@ -37,12 +50,12 @@ class TitlesSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def validate_genre(self, value):
-        """Проверяет, что жанр есть в списке доступных"""
-        genre = Genre.objects.all()
-        if value not in genre:
-            raise serializers.ValidationError('Выберите жанр из списка')
-        return value
+    # def validate_genre(self, value):
+    #     """Проверяет, что жанр есть в списке доступных"""
+    #     genre = Genre.objects.all()
+    #     if value not in genre:
+    #         raise serializers.ValidationError('Выберите жанр из списка')
+    #     return value
 
     def validate_category(self, value):
         """Проверяет, что категория есть в списке доступных"""

@@ -3,16 +3,17 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, viewsets
 from reviews.models import Category, Comments, Genre, Review, Titles
-from serializers import *
+from .serializers import *
 from users.models import User
-
+from rest_framework.pagination import LimitOffsetPagination
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer()
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     # permission_classes = #AdminOrReadOnly
@@ -20,7 +21,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     # permission_classes = #AdminOrReadOnly
@@ -32,7 +34,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
     # permission_classes = #AdminOrReadOnly
-    pagination_class = ''
+    pagination_class = 
     filter_backends = (DjangoFilterBackend,)
     # по ТЗ (redoc) нужно фильтровать категорию и жанр по полю Slug
     # можно потестить вот так: category__slug и genre__slug

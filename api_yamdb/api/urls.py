@@ -20,5 +20,5 @@ urlpatterns = [
     path('v1/', include(router.urls)),
 
     # path('v1/signup/', TokenObtainSlidingView.as_view(), name='token_obtain_sliding'),
-    path('v1/token/', TokenObtainSlidingView.as_view(), name='token_obtain_sliding'),
+    path('v1/auth/token/', TokenObtainSlidingView.as_view(), name='token_obtain_sliding'),
 ]
