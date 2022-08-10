@@ -10,18 +10,6 @@ CHOICES_ROLE = [
 
 
 class User(AbstractUser):
-
+    email = models.EmailField('e-mail', unique=True)
     bio = models.TextField('Биография', blank=True)
-    role = models.CharField('Роль пользователя', default='user', max_length=50, choices=CHOICES_ROLE)
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
-    
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
+    role = models.CharField('Роль польashgfdhagsdfhasgfdahsgdfashзователя', default='user', max_length=50, choices=CHOICES_ROLE)
