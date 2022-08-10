@@ -15,7 +15,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = #AdminOrReadOnly
+    # permission_classes = #AdminOrReadOnly
     filter_backends = (filters.SearchFilter)
     search_fields = ('name',)
 
@@ -23,7 +23,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = #AdminOrReadOnly
+    # permission_classes = #AdminOrReadOnly
     filter_backends = (filters.SearchFilter)
     search_fields = ('name',)
 
@@ -31,7 +31,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = #AdminOrReadOnly
+    # permission_classes = #AdminOrReadOnly
     pagination_class = ''
     filter_backends = (DjangoFilterBackend,)
     # по ТЗ (redoc) нужно фильтровать категорию и жанр по полю Slug
