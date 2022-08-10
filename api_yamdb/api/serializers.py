@@ -67,6 +67,10 @@ class TitlesSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
 
+    def get_score(self, obj):
+        rating = self.obj.score / self.obj.score.count()
+        return rating
+
     class Meta:
         model = Review
         fields = ('score', 'user', 'title')
