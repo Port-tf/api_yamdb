@@ -10,9 +10,10 @@ CHOICES_ROLE = [
 
 
 class User(AbstractUser):
-
+    
     bio = models.TextField('Биография', blank=True)
-    role = models.CharField('Рольasdgasdfafsdgasd пользователя', default='user', max_length=50, choices=CHOICES_ROLE)
+    role = models.CharField('Роль пользователя', default='user', max_length=50, choices=CHOICES_ROLE)
+    email = models.EmailField('e-mail', unique=True)
 
     @property
     def is_user(self):

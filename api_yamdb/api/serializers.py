@@ -1,15 +1,20 @@
 import datetime as dt
-from tkinter.tix import Tree
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from reviews.models import Category, Comments, Genre, Review, Titles, User
+from reviews.models import Category, Comments, Genre, Review, Titles
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # username = serializers.SlugRelatedField(
+    #     slug_field='username',
+    #     queryset=User.objects.all()
+    # )
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -67,7 +72,7 @@ class TitlesSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
 
-    def get_score(self, obj):
+    def get_rating(self, obj):
         rating = self.obj.score / self.obj.score.count()
         return rating
 
@@ -81,5 +86,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        fields = ('text', 'created', 'user', 'review')
+        fields = ('text', 'created', 'user', 'review', 'rating')
         read_only_fields = ('user',)

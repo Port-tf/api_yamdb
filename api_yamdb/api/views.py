@@ -3,13 +3,14 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, viewsets
 from reviews.models import Category, Comments, Genre, Review, Titles
-from .serializers import *
+from api.serializers import (UserSerializer, CategorySerializer, GenreSerializer,
+                             TitlesSerializer, ReviewSerializer, CommentSerializer)
 from users.models import User
 from rest_framework.pagination import LimitOffsetPagination
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer()
+    serializer_class = UserSerializer
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -73,7 +74,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer()
+    serializer_class = CommentSerializer
     # permission_classes = 
 
     def get_queryset(self):
