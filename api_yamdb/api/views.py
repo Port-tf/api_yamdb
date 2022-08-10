@@ -1,14 +1,10 @@
 from django.core.exceptions import PermissionDenied
-
-from rest_framework import viewsets
-from reviews.models import Titles, Review, Genre, Category
-from users.models import User
-from api.serializers import *
 from django.shortcuts import get_object_or_404
-# from rest_framework import permissions
-# from rest_framework import filters
-# from rest_framework import mixins
-from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, viewsets
+from reviews.models import Category, Comments, Genre, Review, Titles
+from serializers import *
+from users.models import User
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -18,19 +14,39 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
-    serializer_class = ReviewSerializer()
+    serializer_class = CategorySerializer
+    permission_classes = #AdminOrReadOnly
+    filter_backends = (filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
-    serializer_class = GenreSerializer()
+    serializer_class = GenreSerializer
+    permission_classes = #AdminOrReadOnly
+    filter_backends = (filters.SearchFilter)
+    search_fields = ('name',)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer()
+    serializer_class = TitlesSerializer
+    permission_classes = #AdminOrReadOnly
+    pagination_class = ''
+    filter_backends = (DjangoFilterBackend,)
+    # по ТЗ (redoc) нужно фильтровать категорию и жанр по полю Slug
+    # можно потестить вот так: category__slug и genre__slug
+    filterset_fields = ('category', 'genre', 'name', 'year', )
+    
+    # def get_permissions(self):
+    #     """Получение инфо о произведении. По ТЗ: Доступно без токена"""
+    #     if self.action == 'retrieve':
+    #         return (ReadOnly(),)  
+    #         #пермишен ReadOnly по аналогии с kittygram для retrieve запросов
+    #     return super().get_permissions()
 
 
+    
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer()
 
@@ -44,10 +60,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user, title=title)
 
     def perform_update(self, serializer):
-        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Изменение чужого контента запрещено!')
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
@@ -69,10 +84,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
     def perform_update(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Изменение чужого контента запрещено!')
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
