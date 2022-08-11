@@ -16,12 +16,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['patch', 'get'], detail=True)
     def me(self, request):
-        user = User.objects.filter(
-            username=self.request.user.username
-        )
-        serializer = self.get_serializer(user)
+        # user = User.objects.filter(
+        #     username=request.user.username
+        # )
+        # user = self.get_object()
+        serializer = self.get_serializer(request.user)
         serializer.save()
         return serializer.data
+
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                     mixins.DestroyModelMixin, viewsets.GenericViewSet):
@@ -61,7 +63,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
     
 class ReviewViewSet(viewsets.ModelViewSet):
-    serializer_class = ReviewSerializer()
+    serializer_class = ReviewSerializer
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")

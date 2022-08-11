@@ -7,10 +7,6 @@ from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # username = serializers.SlugRelatedField(
-    #     slug_field='username',
-    #     queryset=User.objects.all()
-    # )
 
     class Meta:
         model = User
@@ -72,14 +68,15 @@ class TitlesSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
 
-    def get_rating(self, obj):
-        rating = self.obj.score / self.obj.score.count()
-        return rating
 
     class Meta:
         model = Review
-        fields = ('score', 'user', 'title')
+        fields = ('score', 'user', 'title', 'rating')
         read_only_fields = ('user',)
+    
+    def get_rating(self, obj):
+        rating = self.obj.score / self.obj.score.count()
+        return rating
 
 
 class CommentSerializer(serializers.ModelSerializer):
