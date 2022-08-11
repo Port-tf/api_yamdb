@@ -71,17 +71,17 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('score', 'user', 'title', 'rating')
-        read_only_fields = ('user',)
+        fields = ('text', 'score', 'author', 'title')
+        read_only_fields = ('author',)
     
-    def get_rating(self, obj):
-        rating = self.obj.score / self.obj.score.count()
-        return rating
+    # def get_rating(self, obj):
+    #     rating = self.obj.score / self.obj.score.count()
+    #     return rating
 
 
 class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        fields = ('text', 'created', 'user', 'review', 'rating')
-        read_only_fields = ('user',)
+        fields = ('text', 'pub_date', 'author', 'review')
+        read_only_fields = ('author',)

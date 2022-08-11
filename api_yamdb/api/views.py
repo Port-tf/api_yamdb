@@ -72,7 +72,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
-        serializer.save(user=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=title)
 
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
