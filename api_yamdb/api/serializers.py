@@ -1,5 +1,5 @@
 import datetime as dt
-
+from django.db.models import Avg, Count, Min, Sum
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comments, Genre, Review, Titles
@@ -75,24 +75,22 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Titles
-        fields = ('id', 'name', 'year', 'genre', 'category', 'description', 'rating')
+        fields = ('id', 'name', 'year', 'genre', 
+                  'category', 'description', 'rating'
+                  )
 
     def get_rating(self, obj):
-        title_scores = Titles.objects.filter(name=obj.name).count()
-        # title_scores = Titles.objects.filter(name=obj.name)
-        # scores_count = Titles.objects.filter
-        # self.obj.reviews.score.Sum(all)
-        # rating = self.obj.score / self.obj.score.count()
-        return title_scores
->>>>>>> develop_Vlad
-
+        """Считает средний рейтинг произведения"""
+        test_rating = obj.reviews.aggregate(rating=Avg('score'))
+        rating = test_rating.get('rating')
+        return rating
 
 class ReviewSerializer(serializers.ModelSerializer):
 
 
     class Meta:
         model = Review
-        fields = ('id', 'text','author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('author',)
     
 
