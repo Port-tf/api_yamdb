@@ -68,7 +68,7 @@ class TitlesSerializer(serializers.ModelSerializer):
         return value
     
     def get_rating(self, obj):
-        title_scores = Titles.objects.all().count()
+        title_scores = Titles.objects.filter(name=obj.name).count()
         # title_scores = Titles.objects.filter(name=obj.name)
         # scores_count = Titles.objects.filter
         # self.obj.reviews.score.Sum(all)
