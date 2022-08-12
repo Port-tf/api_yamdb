@@ -14,7 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,7 +31,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitlesPostSerialzier(serializers.ModelSerializer):
-    """Сериайлайзер для POST запросов Titles"""
+    """Сериайлайзер для POST, PUT, PATCH запросов"""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -70,6 +71,7 @@ class TitlesPostSerialzier(serializers.ModelSerializer):
 
 
 class TitlesSerializer(serializers.ModelSerializer):
+    """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
 

@@ -1,14 +1,16 @@
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             TitlesPostSerialzier, TitlesSerializer,
+                             UserSerializer)
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend, CharFilter, NumberFilter, FilterSet
+from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
+                                           FilterSet, NumberFilter)
 from rest_framework import filters, mixins, permissions, viewsets
-#from django_filters import FilterSet
-from reviews.models import Category, Comments, Genre, Review, Titles
-from api.serializers import (UserSerializer, CategorySerializer, GenreSerializer,
-                             TitlesSerializer, TitlesPostSerialzier, ReviewSerializer, CommentSerializer)
-from users.models import User
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from reviews.models import Category, Comments, Genre, Review, Titles
+from users.models import User
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -27,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
+                      mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     # permission_classes = #AdminOrReadOnly
@@ -37,16 +39,15 @@ class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 
 class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
+                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     # permission_classes = #AdminOrReadOnly
-    # filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    # filterset_fields = ('slug',)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
-#Кастомный фильтр №1
+
 class TitleFilter(FilterSet):
     name = CharFilter(field_name='name', lookup_expr='icontains')
     category = CharFilter(field_name='category__slug')
@@ -55,7 +56,7 @@ class TitleFilter(FilterSet):
 
     class Meta:
         model = Titles
-        fields = ['name', 'category', 'genre', 'year']
+        fields = ('name', 'category', 'genre', 'year',)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -68,7 +69,6 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         request = self.request.method
-        print(f'Проверка типа реквеста:{request}')
         if request == 'POST' or request == 'PATCH' or request == 'PUT':
             return TitlesPostSerialzier
         return TitlesSerializer
@@ -81,9 +81,6 @@ class TitlesViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
 
-
-
-    
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer()
 
