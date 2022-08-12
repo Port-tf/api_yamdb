@@ -10,24 +10,24 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    
-
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitlesPostSerialzier(serializers.ModelSerializer):
+    """Сериайлайзер для POST, PUT, PATCH запросов"""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -37,10 +37,10 @@ class TitlesSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
-    
+
     class Meta:
         model = Titles
-        fields = ('name', 'year', 'genre', 'category', 'description')
+        fields = ('id', 'name', 'year', 'genre', 'category', 'description')
 
     def validate_year(self, value):
         """Проверяет год выхода произведения"""
@@ -58,12 +58,22 @@ class TitlesSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError('Выберите жанр из списка')
     #     return value
 
-    def validate_category(self, value):
-        """Проверяет, что категория есть в списке доступных"""
-        category = Category.objects.all()
-        if value not in category:
-            raise serializers.ValidationError('Выберите категорию из списка')
-        return value
+    # def validate_category(self, value):
+    #     """Проверяет, что категория есть в списке доступных"""
+    #     category = Category.objects.all()
+    #     if value not in category:
+    #         raise serializers.ValidationError('Выберите категорию из списка')
+    #     return value
+
+
+class TitlesSerializer(serializers.ModelSerializer):
+    """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Titles
+        fields = ('id', 'name', 'year', 'genre', 'category', 'description')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
