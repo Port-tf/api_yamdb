@@ -37,10 +37,12 @@ class TitlesSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+
+    rating = serializers.SerializerMethodField()
     
     class Meta:
         model = Titles
-        fields = ('name', 'year', 'genre', 'category', 'description')
+        fields = ('name', 'year', 'genre', 'category', 'description', 'rating')
 
     def validate_year(self, value):
         """Проверяет год выхода произведения"""
@@ -64,6 +66,14 @@ class TitlesSerializer(serializers.ModelSerializer):
         if value not in category:
             raise serializers.ValidationError('Выберите категорию из списка')
         return value
+    
+    def get_rating(self, obj):
+        title_scores = Titles.objects.all().count()
+        # title_scores = Titles.objects.filter(name=obj.name)
+        # scores_count = Titles.objects.filter
+        # self.obj.reviews.score.Sum(all)
+        # rating = self.obj.score / self.obj.score.count()
+        return title_scores
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -71,12 +81,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('text', 'score', 'author', 'title')
+        fields = ('id', 'text','author', 'score', 'pub_date')
         read_only_fields = ('author',)
     
-    # def get_rating(self, obj):
-    #     rating = self.obj.score / self.obj.score.count()
-    #     return rating
 
 
 class CommentSerializer(serializers.ModelSerializer):
