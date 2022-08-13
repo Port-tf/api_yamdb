@@ -1,10 +1,9 @@
 import datetime as dt
-from multiprocessing import context
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-from reviews.models import Category, Comments, Genre, Review, Titles
+from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
 
@@ -41,7 +40,7 @@ class TitlesPostSerialzier(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Titles
+        model = Title
         fields = ('id', 'name', 'year', 'genre', 'category', 'description')
 
     def validate_year(self, value):
@@ -76,7 +75,7 @@ class TitlesSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
 
     class Meta:
-        model = Titles
+        model = Title
         fields = ('id', 'name', 'year', 'genre', 
                   'category', 'description', 'rating'
                   )
@@ -93,17 +92,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username'
     )
     
-    # def validate(self, data):
-    #     print(self.context)
-    #     author = self.context.get('request').user
-    #     title_id = self.context.get('view').kwargs.get('title_id')
-    #     title = get_object_or_404(Titles, id=title_id)
-    #     if (
-    #         self.context.get('request').method == 'POST'
-    #         and Review.objects.filter(title_id=title.id, author=author).exists()
-    #     ):
-    #         raise ValidationError('Может существовать только один отзыв!')
-    #     return data
+    def validate(self, data):
+        print(self.context)
+        author = self.context.get('request').user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        if (
+            self.context.get('request').method == 'POST'
+            and Review.objects.filter(title_id=title.id, author=author).exists()
+        ):
+            raise ValidationError('Может существовать только один отзыв!')
+        return data
 
     class Meta:
         model = Review
