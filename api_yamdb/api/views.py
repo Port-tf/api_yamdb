@@ -1,33 +1,63 @@
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             TitlesPostSerialzier, TitlesSerializer,
+                             UserSerializer)
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
+                                           FilterSet, NumberFilter)
 from rest_framework import filters, mixins, permissions, viewsets
-from reviews.models import Category, Comments, Genre, Review, Titles
-from .serializers import *
-from users.models import User
+from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
+from reviews.models import Category, Comments, Genre, Review, Titles
+from users.models import User
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+
+    @action(methods=['patch', 'get'], detail=True)
+    def me(self, request):
+        # user = User.objects.filter(
+        #     username=request.user.username
+        # )
+        # user = self.get_object()
+        serializer = self.get_serializer(request.user)
+        serializer.save()
+        return serializer.data
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
+                      mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     # permission_classes = #AdminOrReadOnly
-    # filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
+                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     # permission_classes = #AdminOrReadOnly
-    # filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class TitleFilter(FilterSet):
+    name = CharFilter(field_name='name', lookup_expr='icontains')
+    category = CharFilter(field_name='category__slug')
+    genre = CharFilter(field_name='genre__slug')
+    year = NumberFilter(field_name='year')
+
+    class Meta:
+        model = Titles
+        fields = ('name', 'category', 'genre', 'year',)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -36,9 +66,13 @@ class TitlesViewSet(viewsets.ModelViewSet):
     # permission_classes = #AdminOrReadOnly
     # pagination_class = 
     filter_backends = (DjangoFilterBackend,)
-    # по ТЗ (redoc) нужно фильтровать категорию и жанр по полю Slug
-    # можно потестить вот так: category__slug и genre__slug
-    filterset_fields = ('category', 'genre', 'name', 'year', )
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        request = self.request.method
+        if request == 'POST' or request == 'PATCH' or request == 'PUT':
+            return TitlesPostSerialzier
+        return TitlesSerializer
     
     # def get_permissions(self):
     #     """Получение инфо о произведении. По ТЗ: Доступно без токена"""
@@ -48,9 +82,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
 
-    
 class ReviewViewSet(viewsets.ModelViewSet):
-    serializer_class = ReviewSerializer()
+    serializer_class = ReviewSerializer
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
@@ -59,7 +92,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
-        serializer.save(user=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=title)
 
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
@@ -73,7 +106,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer()
+    serializer_class = CommentSerializer
     # permission_classes = 
 
     def get_queryset(self):

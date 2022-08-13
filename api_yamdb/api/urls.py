@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from api.views import *
+from api.views import (UserViewSet, CategoryViewSet, GenreViewSet,
+                       TitlesViewSet, CommentViewSet, ReviewViewSet)
 from rest_framework_simplejwt.views import TokenObtainSlidingView
 
 app_name = 'api'
