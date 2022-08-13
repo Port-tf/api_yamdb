@@ -32,35 +32,16 @@ class Titles(models.Model):
         related_name='titles'
     )
 
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(
+    #             fields=['author', 'title'],
+    #             name='unique_author_title'
+    #         )
+    #     ]
 
     def __str__(self):
         return self.name
-
-
-# class Score(models.Model):
-#     score = models.IntegerField(
-#         validators=[MinValueValidator(limit_value=0),
-#                     MaxValueValidator(limit_value=10)
-#                     ],
-#         default=0
-#     )
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='scores'
-#     )
-#     title = models.ForeignKey(
-#         Titles,
-#         on_delete=models.CASCADE,
-#         related_name='scores'
-#     )
-#     class Meta:
-#         constraints = [
-#             models.UniqueConstraint(
-#                 fields=['user', 'title'],
-#                 name='unique_user_title'
-#             )
-#         ]
 
 
 class Review(models.Model):

@@ -1,7 +1,9 @@
 import datetime as dt
-from django.db.models import Avg, Count, Min, Sum
+from multiprocessing import context
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from django.core.exceptions import ValidationError
 from reviews.models import Category, Comments, Genre, Review, Titles
 from users.models import User
 
@@ -86,18 +88,34 @@ class TitlesSerializer(serializers.ModelSerializer):
         return rating
 
 class ReviewSerializer(serializers.ModelSerializer):
-
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+    
+    # def validate(self, data):
+    #     print(self.context)
+    #     author = self.context.get('request').user
+    #     title_id = self.context.get('view').kwargs.get('title_id')
+    #     title = get_object_or_404(Titles, id=title_id)
+    #     if (
+    #         self.context.get('request').method == 'POST'
+    #         and Review.objects.filter(title_id=title.id, author=author).exists()
+    #     ):
+    #         raise ValidationError('Может существовать только один отзыв!')
+    #     return data
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only_fields = ('author',)
-    
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
     class Meta:
         model = Comments
-        fields = ('text', 'pub_date', 'author', 'review')
-        read_only_fields = ('author',)
+        fields = ('id', 'text', 'pub_date', 'author', 'review')
+        read_only_fields = ('review',)
