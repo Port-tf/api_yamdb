@@ -82,7 +82,7 @@ class TitlesSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         """Считает средний рейтинг произведения"""
         title_rating = obj.reviews.aggregate(rating=Avg('score'))
-        rating = title_rating.get('rating')
+        rating = titlepy_rating.get('rating')
         return rating
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -100,4 +100,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ('text', 'pub_date', 'author', 'review')
-        read_only_fields = ('author',)
+        read_only_fields = ('review',)
