@@ -2,7 +2,7 @@ from http.client import ImproperConnectionState
 from multiprocessing import context
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
-                             TitlesPostSerialzier, TitlesSerializer,
+                             TitlePostSerialzier, TitleSerializer,
                              UserSerializer, SignUpSerializer)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
@@ -42,7 +42,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, AdminPermission] 
     lookup_field = 'username'
 
-    # допилить, не работает
     @action(methods=['patch', 'get'], detail=True)
     def me(self, request):
         # user = User.objects.filter(
@@ -85,9 +84,9 @@ class TitleFilter(FilterSet):
         fields = ('name', 'category', 'genre', 'year',)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitlesSerializer
+    serializer_class = TitleSerializer
     permission_classes = [AdminPermission]
     # pagination_class = 
     filter_backends = (DjangoFilterBackend,)
@@ -96,8 +95,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         request = self.request.method
         if request == 'POST' or request == 'PATCH' or request == 'PUT':
-            return TitlesPostSerialzier
-        return TitlesSerializer
+            return TitlePostSerialzier
+        return TitleSerializer
     
     # def get_permissions(self):
     #     """Получение инфо о произведении. По ТЗ: Доступно без токена"""

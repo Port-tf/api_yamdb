@@ -1,8 +1,9 @@
 import datetime as dt
+
+from django.core.exceptions import ValidationError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
 from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
@@ -11,9 +12,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
-
-        #валидация на me
-        # нельзя создать юзера "me"
 
     def validate_username(self, value):
         if value == 'me':
@@ -43,7 +41,7 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesPostSerialzier(serializers.ModelSerializer):
+class TitlePostSerialzier(serializers.ModelSerializer):
     """Сериайлайзер для POST, PUT, PATCH запросов"""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
@@ -83,7 +81,7 @@ class TitlesPostSerialzier(serializers.ModelSerializer):
     #     return value
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
