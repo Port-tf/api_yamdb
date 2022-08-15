@@ -10,12 +10,7 @@ class AdminPermission(permissions.BasePermission):
 
 
 
-class AuthorPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.method in permissions.SAFE_METHODS
-            or request.user.is_authenticated
-        )
+class AuthorPermission(permissions.IsAuthenticatedOrReadOnly):
 
     def has_object_permission(self, request, view, obj):
         return (

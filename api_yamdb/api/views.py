@@ -1,18 +1,42 @@
+from http.client import ImproperConnectionState
+from multiprocessing import context
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitlesPostSerialzier, TitlesSerializer,
-                             UserSerializer)
-from django.core.exceptions import PermissionDenied
+                             UserSerializer, SignUpSerializer)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
                                            FilterSet, NumberFilter)
-from rest_framework import filters, mixins, permissions, viewsets
+from rest_framework import filters, mixins, permissions, viewsets, status,views
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
-from rest_framework.decorators import action
+from rest_framework.views import APIView
+from rest_framework.decorators import action, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
 from .permissions import AuthorPermission, AdminPermission
 from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
+from rest_framework.response import Response
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+
+
+
+
+@permission_classes([AllowAny])
+class SignUpApiView(APIView):
+    def post(self, request):
+        print(f'Посмотри, какой реквест: {self.request}')
+        serializer = SignUpSerializer(data=request.data)
+        print(f'Посмотри, какой сериализатор: {serializer}')
+        if serializer.is_valid():
+            user = serializer.save()
+            print(f'Посмотри, пришел на поклон: {serializer}')
+            code = default_token_generator.make_token(user)
+            send_mail('Subject here', code,'1@api.api', [request.data.get('email')],)
+            return Response(serializer.data, status=status.HTTP_201_CREATED) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+
 
 
 class UserViewSet(viewsets.ModelViewSet):

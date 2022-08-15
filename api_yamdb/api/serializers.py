@@ -7,6 +7,12 @@ from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
 
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
