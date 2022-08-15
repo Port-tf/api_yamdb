@@ -21,7 +21,6 @@ from django.contrib.auth.tokens import default_token_generator
 
 
 
-
 @permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
@@ -32,19 +31,18 @@ class SignUpApiView(APIView):
             user = serializer.save()
             print(f'Посмотри, пришел на поклон: {serializer}')
             code = default_token_generator.make_token(user)
-            send_mail('Subject here', code,'1@api.api', [request.data.get('email')],)
-            return Response(serializer.data, status=status.HTTP_201_CREATED) 
+            send_mail('Subject here', code, '1@api.api', [request.data.get('email')],)
+            return Response(serializer.data, status=status.HTTP_200_OK) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
-
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminPermission]
+    permission_classes = [IsAuthenticated, AdminPermission] 
     lookup_field = 'username'
 
+    # допилить, не работает
     @action(methods=['patch', 'get'], detail=True)
     def me(self, request):
         # user = User.objects.filter(

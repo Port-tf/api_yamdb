@@ -12,6 +12,16 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
+        #валидация на me
+        # нельзя создать юзера "me"
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
+
 
 class UserSerializer(serializers.ModelSerializer):
 

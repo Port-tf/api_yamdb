@@ -11,7 +11,7 @@ class AdminPermission(permissions.BasePermission):
 
 
 class AuthorPermission(permissions.IsAuthenticatedOrReadOnly):
-
+#Пересмотреть название на более понятное
     def has_object_permission(self, request, view, obj):
         return (
             request.method in permissions.SAFE_METHODS
