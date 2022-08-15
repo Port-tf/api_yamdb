@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from .permissions import AuthorPermission
-from reviews.models import Category, Comments, Genre, Review, Titles
+from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
 
@@ -58,12 +58,12 @@ class TitleFilter(FilterSet):
     year = NumberFilter(field_name='year')
 
     class Meta:
-        model = Titles
+        model = Title
         fields = ('name', 'category', 'genre', 'year',)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
+    queryset = Title.objects.all()
     serializer_class = TitlesSerializer
     # permission_classes = 
     # pagination_class = 
@@ -90,11 +90,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
-        title = get_object_or_404(Titles, id=title_id)
+        title = get_object_or_404(Title, id=title_id)
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
     # def perform_update(self, serializer):

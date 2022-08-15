@@ -20,7 +20,7 @@ class Genre(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(max_length=100)
     year = models.IntegerField()
     description = models.TextField(blank=True)
@@ -32,13 +32,7 @@ class Titles(models.Model):
         related_name='titles'
     )
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=['author', 'title'],
-    #             name='unique_author_title'
-    #         )
-    #     ]
+
 
     def __str__(self):
         return self.name
@@ -57,7 +51,7 @@ class Review(models.Model):
         related_name='reviews'
     )
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
@@ -67,6 +61,14 @@ class Review(models.Model):
             MaxValueValidator(limit_value=10)
         ],
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
 
     def __str__(self):
         return self.text[:15]
