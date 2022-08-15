@@ -1,4 +1,6 @@
 import datetime as dt
+
+from django.core.exceptions import ValidationError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -11,7 +13,7 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
-    
+
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
@@ -38,13 +40,6 @@ class UserSerializer(serializers.ModelSerializer):
     #     ):
     #         raise ValidationError('Может существовать только один отзыв!')
     #     return data    
-
-    # def validate_username(self, value):
-    #     if value == 'me':
-    #         raise serializers.ValidationError(
-    #             'Имя пользователя "me" не разрешено.'
-    #         )
-    #     return value
 
 
 class CategorySerializer(serializers.ModelSerializer):

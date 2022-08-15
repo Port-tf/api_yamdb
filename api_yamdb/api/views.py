@@ -2,7 +2,7 @@ from http.client import ImproperConnectionState
 from multiprocessing import context
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
-                             TitlesPostSerialzier, TitlesSerializer,
+                             TitlePostSerialzier, TitleSerializer,
                              UserSerializer, SignUpSerializer)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
@@ -21,7 +21,6 @@ from django.contrib.auth.tokens import default_token_generator
 
 
 
-
 @permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
@@ -32,11 +31,9 @@ class SignUpApiView(APIView):
             user = serializer.save()
             print(f'Посмотри, пришел на поклон: {serializer}')
             code = default_token_generator.make_token(user)
-            send_mail('Subject here', code,'1@api.api', [request.data.get('email')],)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+            send_mail('Subject here', code, '1@api.api', [request.data.get('email')],)
+            return Response(serializer.data, status=status.HTTP_200_OK) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -87,9 +84,9 @@ class TitleFilter(FilterSet):
         fields = ('name', 'category', 'genre', 'year',)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitlesSerializer
+    serializer_class = TitleSerializer
     permission_classes = [AdminPermission]
     # pagination_class = 
     filter_backends = (DjangoFilterBackend,)
@@ -98,8 +95,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         request = self.request.method
         if request == 'POST' or request == 'PATCH' or request == 'PUT':
-            return TitlesPostSerialzier
-        return TitlesSerializer
+            return TitlePostSerialzier
+        return TitleSerializer
     
     # def get_permissions(self):
     #     """Получение инфо о произведении. По ТЗ: Доступно без токена"""
