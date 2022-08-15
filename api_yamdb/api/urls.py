@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from api.views import (UserViewSet, CategoryViewSet, GenreViewSet,
-                       TitlesViewSet, CommentViewSet, ReviewViewSet)
+                       TitlesViewSet, CommentViewSet, ReviewViewSet, SignUpApiView)
 from rest_framework_simplejwt.views import TokenObtainSlidingView
 
 app_name = 'api'
@@ -20,6 +20,6 @@ router.register(r'titles/(?P<title_id>\d+)/reviews',
 urlpatterns = [
     path('v1/', include(router.urls)),
 
-    # path('v1/signup/', TokenObtainSlidingView.as_view(), name='token_obtain_sliding'),
+    path('v1/auth/signup/', SignUpApiView.as_view(), name='token_obtain'),
     path('v1/auth/token/', TokenObtainSlidingView.as_view(), name='token_obtain_sliding'),
 ]
