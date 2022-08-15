@@ -1,4 +1,6 @@
 import datetime as dt
+
+from django.core.exceptions import ValidationError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -12,6 +14,13 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -19,6 +28,18 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
+    
+    # def validate(self, data):
+    #     print(self.context)
+    #     author = self.context.get('request').user
+    #     title_id = self.context.get('view').kwargs.get('title_id')
+    #     title = get_object_or_404(Title, id=title_id)
+    #     if (
+    #         self.context.get('request').method == 'POST'
+    #         and Review.objects.filter(title_id=title.id, author=author).exists()
+    #     ):
+    #         raise ValidationError('Может существовать только один отзыв!')
+    #     return data    
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -82,7 +103,7 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'genre', 
+        fields = ('id', 'name', 'year', 'genre',
                   'category', 'description', 'rating'
                   )
 
@@ -90,7 +111,9 @@ class TitlesSerializer(serializers.ModelSerializer):
         """Считает средний рейтинг произведения"""
         title_rating = obj.reviews.aggregate(rating=Avg('score'))
         rating = title_rating.get('rating')
-        return rating
+        if rating is None:
+            return None
+        return round(rating, 1)
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
