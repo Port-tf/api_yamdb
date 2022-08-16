@@ -66,5 +66,11 @@ python manage.py runserver
 
 ### Endpoints:
 
+| Endpoint                                   |Request method  | Body                                                  | Response           | Comment               |
+|--------------------------------------------|----------------|-------------------------------------------------------|--------------------|-----------------------|
+|api/v1/auth/signup/                         |POST            |```{"username": "me","email": "me@mail.ru"}```         | User's information |User's registatration  |
+|api/v1/auth/token/                          |POST            |```{"username": "string","confirmation_code": "string"}|``` {"token":eyJ0eXOi}```|                  |
+|api/v1/titles/                              |GET             |                                                       | List of titles     |Show list of titles    |
+|api/v1/titles/{title_id}/reviews/           |POST            |```{"text": "string","score": 1}```                    |Reviews's info      |Post review and rate a title|
 
 
