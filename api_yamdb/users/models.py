@@ -10,7 +10,7 @@ CHOICES_ROLE = [
 
 
 class User(AbstractUser):
-    
+    # username = models.CharField(max_length=150, unique=True, null=True)
     bio = models.TextField('Биография', blank=True)
     role = models.CharField('Роль пользователя', default='user', max_length=50, choices=CHOICES_ROLE)
     email = models.EmailField('e-mail', unique=True)
@@ -26,3 +26,11 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == 'admin'
+    
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(
+    #             fields=['username', 'email'],
+    #             name='unique_email_user'
+    #         )
+    #     ]

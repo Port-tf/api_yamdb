@@ -1,4 +1,5 @@
 import datetime as dt
+from enum import unique
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -8,8 +9,8 @@ from users.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
+    # username = serializers.CharField(required=True)
+    # email = serializers.EmailField(required=True)
     class Meta:
         model = User
         fields = ('username', 'email')
