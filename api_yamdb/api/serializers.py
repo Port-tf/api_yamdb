@@ -1,10 +1,12 @@
 import datetime as dt
-from enum import unique
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
+
 from reviews.models import Category, Comments, Genre, Review, Title
+
 from users.models import User
 
 
@@ -26,6 +28,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 class TokenRegSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
+
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
@@ -84,12 +87,6 @@ class TitlePostSerialzier(serializers.ModelSerializer):
             )
         return value
 
-    # def validate_genre(self, value):
-    #     """Проверяет, что жанр есть в списке доступных"""
-    #     genre = Genre.objects.all()
-    #     if value not in genre:
-    #         raise serializers.ValidationError('Выберите жанр из списка')
-    #     return value
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""

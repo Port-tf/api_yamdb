@@ -1,23 +1,29 @@
-import re
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.db.models import Avg, DecimalField
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from reviews.models import Category, Genre, Review, Title
-from users.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
 from api.filters import TitleFilter
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitlePostSerialzier,
-                             TitleSerializer, UserSerializer,
-                             TokenRegSerializer, UserEditSerializer)
+                             TitleSerializer, TokenRegSerializer,
+                             UserEditSerializer, UserSerializer)
+
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db.models import Avg, DecimalField
+from django.shortcuts import get_object_or_404
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from reviews.models import Category, Genre, Review, Title
+
+from users.models import User
+
 from .permissions import AdminPermission, AuthorPermission, UserOrAdmins
 
 
@@ -39,17 +45,17 @@ class SignUpApiView(APIView):
 class TokenRegApiView(APIView):
     def post(self, request):
         serializer = TokenRegSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.data.get('username')
-            user = get_object_or_404(User, username=username)
-            confirmation_code = serializer.data.get('confirmation_code')
-            if not default_token_generator.check_token(user, confirmation_code):
-                message = 'Вы использовали неправильный код или время действия окончено'
-                return Response({message}, status=status.HTTP_400_BAD_REQUEST)
-        # username = serializer.data.get('username')
-        # user = get_object_or_404(User, username='username')
-        token = RefreshToken.for_user(user)
-        return Response({'token': str(token.access_token)}, status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        confirmation_code = serializer.validated_data['confirmation_code']
+        user = get_object_or_404(User, username=username)
+        if not default_token_generator.check_token(user, confirmation_code):
+            message = 'Вы использовали неправильный'
+            'код или время действия окончено'
+            return Response({message}, status=status.HTTP_400_BAD_REQUEST)
+        refresh = RefreshToken.for_user(user)
+        return Response({'token': str(refresh.access_token)},
+                        status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -58,15 +64,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [UserOrAdmins]
     lookup_field = 'username'
 
-    # @action(methods=['PATCH', 'GET'], detail=True, permission_classes=(IsAuthenticated))
-    # def me(self, request):
-    #     user = get_object_or_404(User, username=self.request.user)
-    #     if request.method == 'PATCH':
-    #         serializer = UserSerializer(user, data=request.data, partial=True)
-    #         serializer.is_valid(raise_exception=True)
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     @action(
         methods=['GET', 'PATCH'],
         detail=False,
@@ -84,18 +81,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 user,
                 data=request.data,
                 partial=True
-                )
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK
-                )
+            )
         return Response(
             serializer.data, status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
-        
-
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,

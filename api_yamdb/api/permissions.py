@@ -19,6 +19,7 @@ class AuthorPermission(permissions.IsAuthenticatedOrReadOnly):
             or request.user.role == 'admin'
         )
 
+
 class UserOrAdmins(permissions.BasePermission):
 
     def has_permission(self, request, view):

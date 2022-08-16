@@ -135,6 +135,3 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
-
-
-
