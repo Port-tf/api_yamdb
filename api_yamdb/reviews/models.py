@@ -1,6 +1,5 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from django.db import models
 from users.models import User
 
 
@@ -42,7 +41,7 @@ class Review(models.Model):
         help_text='Введите текст отзыва'
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
