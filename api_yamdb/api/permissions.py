@@ -18,3 +18,19 @@ class AuthorPermission(permissions.IsAuthenticatedOrReadOnly):
             or request.user.role == 'moderator'
             or request.user.role == 'admin'
         )
+
+class UserOrAdmins(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and (
+                request.user.is_admin
+                or request.user.is_staff)
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            obj == request.user
+            or request.user.is_admin
+            or request.user.is_staff)
