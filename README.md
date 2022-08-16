@@ -1,11 +1,11 @@
 # YaMDb | REST API Service 
 
 ### Team:
-Igor Skoda - @Port-tf (team-lead, developer) 
+- Igor Skoda - @Port-tf (team-lead, developer) 
 
-Vadim Volkovsky - @VadimVolkovsky (developer)
+- Vladislav Khizhnyak - @cortin34 (developer)
 
-Vladislav Khizhnyak - @cortin34 (developer)
+- Vadim Volkovsky - @VadimVolkovsky (developer)
 
 ### Description:
 YaMDb project colletct user's reviews on films, music, books, and allows to discuss it in comments.
@@ -13,10 +13,10 @@ YaMDb project colletct user's reviews on films, music, books, and allows to disc
 Lists of categories and genres are definated by admin, but it could be increased in a future 
 
 ### Key features:
-User's registration with verification via confirmation code (send on e-mail)
-Custom user's roles, such as: user, moderator, admin
-Custom filters by genre and category
-Custom JWT Authenctication
+- User's registration with verification via confirmation code (send on e-mail)
+- Custom user's roles, such as: user, moderator, admin
+- Custom filters by genre and category
+- Custom JWT Authenctication
 
 ### How to start:
 
