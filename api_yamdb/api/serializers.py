@@ -54,7 +54,7 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesPostSerialzier(serializers.ModelSerializer):
+class TitlePostSerialzier(serializers.ModelSerializer):
     """Сериайлайзер для POST, PUT, PATCH запросов"""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
@@ -94,7 +94,7 @@ class TitlesPostSerialzier(serializers.ModelSerializer):
     #     return value
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
