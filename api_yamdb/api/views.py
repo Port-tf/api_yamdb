@@ -2,6 +2,7 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitlePostSerialzier,
                              TitleSerializer, UserSerializer)
+from api.filters import TitleFilter
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg, DecimalField
@@ -17,6 +18,7 @@ from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 from .permissions import AdminPermission, AuthorPermission
+
 
 
 @permission_classes([AllowAny])
@@ -73,21 +75,10 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class TitleFilter(FilterSet):
-    name = CharFilter(field_name='name', lookup_expr='icontains')
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-    year = NumberFilter(field_name='year')
-
-    class Meta:
-        model = Title
-        fields = ('name', 'category', 'genre', 'year',)
-
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = []
+    permission_classes = [AdminPermission]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
