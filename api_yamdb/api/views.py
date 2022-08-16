@@ -1,9 +1,7 @@
-from http.client import ImproperConnectionState
-from multiprocessing import context
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitlesPostSerialzier, TitlesSerializer,
-                             UserSerializer, SignUpSerializer)
+                             UserSerializer, SignUpSerializer, TokenRegSerializer)
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
                                            FilterSet, NumberFilter)
@@ -18,23 +16,40 @@ from users.models import User
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
-
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 
 @permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
-        print(f'Посмотри, какой реквест: {self.request}')
         serializer = SignUpSerializer(data=request.data)
-        print(f'Посмотри, какой сериализатор: {serializer}')
         if serializer.is_valid():
             user = serializer.save()
-            print(f'Посмотри, пришел на поклон: {serializer}')
             code = default_token_generator.make_token(user)
             send_mail('Subject here', code,'1@api.api', [request.data.get('email')],)
-            return Response(serializer.data, status=status.HTTP_201_CREATED) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+            return Response(serializer.data, status=status.HTTP_200_OK) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@permission_classes([AllowAny])
+class TokenRegApiView(APIView):
+    
+    def post(self, request):
+        print(f'Посмотри, какой реквест: {self.request}')
+        serializer = TokenRegSerializer(data=request.data)
+        print(f'Посмотри, какой сериализатор: {serializer}')
+        if serializer.is_valid():
+            username = serializer.data.get('username')
+            user = get_object_or_404(User, username=username)
+            confirmation_code = serializer.data.get('confirmation_code')
+            if not default_token_generator.check_token(user, confirmation_code):
+                message = 'Вы использовали непровиль код или время действия окончено'
+                return Response({message}, status=status.HTTP_400_BAD_REQUEST)
+        token = RefreshToken.for_user(user)
+
+        print(f'Посмотри: {token}')
+        return Response({'token': str(token.access_token)}, status=status.HTTP_200_OK)
 
 
 

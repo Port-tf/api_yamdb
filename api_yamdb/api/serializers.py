@@ -13,6 +13,14 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
 
+class TokenRegSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
