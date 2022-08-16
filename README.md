@@ -70,9 +70,7 @@ python manage.py runserver
 
 ### How to register user:
 - Make POST request with "username" and "email" in body, to endpoint "api/v1/auth/signup/"
-
 - YaMDb send you email with confirmation code
-
 - Make POST request with "email" and "confirmation_code" in body, to endpoint "api/v1/auth/token/", in response you will receive JWT-token.
 
 
