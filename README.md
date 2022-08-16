@@ -8,13 +8,13 @@
 - Vadim Volkovsky - @VadimVolkovsky (developer)
 
 ### Description:
-YaMDb project colletct user's reviews on films, music, books.
+YaMDb project collects user's reviews on films, music, books.
 
 Users can post reviews on title, rate it (from 1 to 10) and discusss it in comments. 
 
-Current averrage rating is automatically calucatulating in each title
+Current averrage rating is automatically calucatulating in each title.
 
-Lists of categories and genres are definated by admin, but it could be increased in a future 
+Lists of categories and genres are definated by admin, but it could be increased in a future.
 
 ### Key features:
 - User's registration with verification via confirmation code (send on e-mail)
