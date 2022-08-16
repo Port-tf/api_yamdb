@@ -68,6 +68,24 @@ python manage.py runserver
 ```
 
 
+### How to register user:
+- Make POST request with "username" and "email" in body, to endpoint "api/v1/auth/signup/"
+
+- YaMDb send you email with confirmation code
+
+- Make POST request with "email" and "confirmation_code" in body, to endpoint "api/v1/auth/token/", in response you will receive JWT-token.
+
+
+### API YaMDb resources:
+- AUTH: authectication.
+- USERS: users registration/edit information.
+- TITLES: titles and their reviews with rating
+- CATEGORIES: types of titles (films, books, music)
+- GENRES: genres of titles. One title could have many genres
+- REVIEWS: reviews on titles. Each review is related to definated title
+- COMMENTS: comments on reviews. Each comment is related to definated review
+
+
 ### Endpoints:
 
 | Endpoint                                   |Request method  | Body                                                  | Response           | Comment               |
