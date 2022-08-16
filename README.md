@@ -1,25 +1,36 @@
-# Проект YaMDb
-Проект собирает отзывы пользователей на кино, фильмы и музыку. Написан в рамках учебного курса Яндекс Практикума.
+# YaMDb | REST API Service 
 
-Проект позволяет управлять постами, комментариями, подписками и группами.
+### Team:
+Igor Skoda - @Port-tf (team-lead, developer) 
 
-### Технологии
-- Библиотека Django REST Framework
-- Аутендификация по JWT токену
+Vadim Volkovsky - @VadimVolkovsky (developer)
 
-### Как запустить проект:
+Vladislav Khizhnyak - @cortin34 (developer)
 
-Клонировать репозиторий и перейти в него в командной строке:
+### Description:
+YaMDb project colletct user's reviews on films, music, books, and allows to discuss it in comments.
 
+Lists of categories and genres are definated by admin, but it could be increased in a future 
+
+### Key features:
+User's registration with verification via confirmation code (send on e-mail)
+Custom user's roles, such as: user, moderator, admin
+Custom filters by genre and category
+Custom JWT Authenctication
+
+### How to start:
+
+Clone the repository:
 ```
 git clone git@github.com:Port-tf/api_yamdb.git
 ```
 
+Change your present working directory (pwd):
 ```
-cd api_yamdb
+cd /api_yamdb/
 ```
 
-Cоздать и активировать виртуальное окружение:
+Create and activate virtual enviroment:
 
 ```
 python -m venv venv
@@ -29,27 +40,31 @@ python -m venv venv
 source venv/scripts/activate
 ```
 
+Update your pip:
 ```
 python3 -m pip install --upgrade pip
 ```
 
-Установить зависимости из файла requirements.txt:
+Install requirements from requirements.txt:
 
 ```
 pip install -r requirements.txt
 ```
 
-Выполнить миграции:
+Make migrations:
 
 ```
 python manage.py migrate
 ```
 
-Запустить проект:
+Run the project:
 
 ```
 python manage.py runserver
 ```
 
 
-## тест внесения изменений VadimVolkovsky
+### Endpoints:
+
+
+
