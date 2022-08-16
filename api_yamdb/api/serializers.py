@@ -99,7 +99,7 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
 
-    rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField()
 
     class Meta:
         model = Title
@@ -107,13 +107,13 @@ class TitleSerializer(serializers.ModelSerializer):
                   'category', 'description', 'rating'
                   )
 
-    def get_rating(self, obj):
-        """Считает средний рейтинг произведения"""
-        title_rating = obj.reviews.aggregate(rating=Avg('score'))
-        rating = title_rating.get('rating')
-        if rating is None:
-            return None
-        return round(rating, 1)
+    # def get_rating(self, obj):
+    #     """Считает средний рейтинг произведения"""
+    #     title_rating = obj.reviews.aggregate(rating=Avg('score'))
+    #     rating = title_rating.get('rating')
+    #     if rating is None:
+    #         return None
+    #     return round(rating, 1)
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(

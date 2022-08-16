@@ -1,5 +1,6 @@
 from http.client import ImproperConnectionState
 from multiprocessing import context
+from urllib import request
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitlePostSerialzier, TitleSerializer,
@@ -7,6 +8,7 @@ from api.serializers import (CategorySerializer, CommentSerializer,
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
                                            FilterSet, NumberFilter)
+from django.db.models import DecimalField, Avg
 from rest_framework import filters, mixins, permissions, viewsets, status,views
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
@@ -87,16 +89,22 @@ class TitleFilter(FilterSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [AdminPermission]
+    permission_classes = []
     # pagination_class = 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        request = self.request.method
-        if request == 'POST' or request == 'PATCH' or request == 'PUT':
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
             return TitlePostSerialzier
         return TitleSerializer
+    
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        if self.request.method == 'GET':
+            queryset = queryset.annotate(rating=Avg('reviews__score', output_field=DecimalField()))
+        return queryset
+
     
     # def get_permissions(self):
     #     """Получение инфо о произведении. По ТЗ: Доступно без токена"""
