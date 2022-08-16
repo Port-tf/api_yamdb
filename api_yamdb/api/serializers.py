@@ -8,9 +8,18 @@ from users.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
     class Meta:
         model = User
         fields = ('username', 'email')
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
 
 
 class TokenRegSerializer(serializers.ModelSerializer):

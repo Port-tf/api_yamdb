@@ -57,18 +57,18 @@ class TokenRegApiView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminPermission]
+    permission_classes = [AdminPermission]
     lookup_field = 'username'
 
-    @action(methods=['patch', 'get'], detail=True)
+    @action(methods=['patch', 'get'], detail=True, permission_classes=(IsAuthenticated,))
     def me(self, request):
-        # user = User.objects.filter(
-        #     username=request.user.username
-        # )
-        # user = self.get_object()
-        serializer = self.get_serializer(request.user)
-        serializer.save()
-        return serializer.data
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            print(f'Это объект me {serializer}')
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
