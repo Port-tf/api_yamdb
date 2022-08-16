@@ -1,6 +1,5 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from django.db import models
 from users.models import User
 
 
@@ -32,14 +31,6 @@ class Title(models.Model):
         related_name='titles'
     )
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=['author', 'title'],
-    #             name='unique_author_title'
-    #         )
-    #     ]
-
     def __str__(self):
         return self.name
 
@@ -50,7 +41,7 @@ class Review(models.Model):
         help_text='Введите текст отзыва'
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

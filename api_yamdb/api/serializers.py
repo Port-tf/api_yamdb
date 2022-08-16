@@ -1,10 +1,8 @@
 import datetime as dt
 
 from django.core.exceptions import ValidationError
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
 from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
@@ -28,18 +26,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
-    
-    # def validate(self, data):
-    #     print(self.context)
-    #     author = self.context.get('request').user
-    #     title_id = self.context.get('view').kwargs.get('title_id')
-    #     title = get_object_or_404(Title, id=title_id)
-    #     if (
-    #         self.context.get('request').method == 'POST'
-    #         and Review.objects.filter(title_id=title.id, author=author).exists()
-    #     ):
-    #         raise ValidationError('Может существовать только один отзыв!')
-    #     return data    
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -79,20 +65,6 @@ class TitlePostSerialzier(serializers.ModelSerializer):
             )
         return value
 
-    # def validate_genre(self, value):
-    #     """Проверяет, что жанр есть в списке доступных"""
-    #     genre = Genre.objects.all()
-    #     if value not in genre:
-    #         raise serializers.ValidationError('Выберите жанр из списка')
-    #     return value
-
-    # def validate_category(self, value):
-    #     """Проверяет, что категория есть в списке доступных"""
-    #     category = Category.objects.all()
-    #     if value not in category:
-    #         raise serializers.ValidationError('Выберите категорию из списка')
-    #     return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
@@ -107,20 +79,13 @@ class TitleSerializer(serializers.ModelSerializer):
                   'category', 'description', 'rating'
                   )
 
-    # def get_rating(self, obj):
-    #     """Считает средний рейтинг произведения"""
-    #     title_rating = obj.reviews.aggregate(rating=Avg('score'))
-    #     rating = title_rating.get('rating')
-    #     if rating is None:
-    #         return None
-    #     return round(rating, 1)
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
     )
-    
+
     def validate(self, data):
         print(self.context)
         author = self.context.get('request').user
@@ -128,7 +93,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         title = get_object_or_404(Title, id=title_id)
         if (
             self.context.get('request').method == 'POST'
-            and Review.objects.filter(title_id=title.id, author=author).exists()
+            and Review.objects.filter(title_id=title.id,
+                                      author=author).exists()
         ):
             raise ValidationError('Может существовать только один отзыв!')
         return data
@@ -143,6 +109,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
+
     class Meta:
         model = Comments
         fields = ('id', 'text', 'pub_date', 'author', 'review')
