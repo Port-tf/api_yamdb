@@ -1,7 +1,7 @@
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitlePostSerialzier,
-                             TitleSerializer, UserSerializer)
+                             TitleSerializer, UserSerializer, TokenRegSerializer)
 from api.filters import TitleFilter
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import AdminPermission, AuthorPermission
 
 
