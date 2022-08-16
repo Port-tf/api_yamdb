@@ -10,7 +10,7 @@ from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
                                            FilterSet, NumberFilter)
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from reviews.models import Category, Genre, Review, Title
@@ -87,7 +87,7 @@ class TitleFilter(FilterSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = []
+    permission_classes = [AdminPermission]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
