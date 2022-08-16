@@ -8,13 +8,13 @@
 - Vadim Volkovsky - @VadimVolkovsky (developer)
 
 ### Description:
-YaMDb project colletct user's reviews on films, music, books.
+YaMDb project collects user's reviews on films, music, books.
 
 Users can post reviews on title, rate it (from 1 to 10) and discusss it in comments. 
 
-Current averrage rating is automatically calucatulating in each title
+Current averrage rating is automatically calucatulating in each title.
 
-Lists of categories and genres are definated by admin, but it could be increased in a future 
+Lists of categories and genres are definated by admin, but it could be increased in a future.
 
 ### Key features:
 - User's registration with verification via confirmation code (send on e-mail)
@@ -66,6 +66,22 @@ Run the project:
 ```
 python manage.py runserver
 ```
+
+
+### How to register user:
+1. Make POST request with "username" and "email" in body, to endpoint "api/v1/auth/signup/"
+2. YaMDb send you email with confirmation code
+3. Make POST request with "email" and "confirmation_code" in body, to endpoint "api/v1/auth/token/", in response you will receive JWT-token.
+
+
+### API YaMDb resources:
+- AUTH: authectication.
+- USERS: users registration/edit information.
+- TITLES: titles and their reviews with rating
+- CATEGORIES: types of titles (films, books, music)
+- GENRES: genres of titles. One title could have many genres
+- REVIEWS: reviews on titles. Each review is related to definated title
+- COMMENTS: comments on reviews. Each comment is related to definated review
 
 
 ### Endpoints:
