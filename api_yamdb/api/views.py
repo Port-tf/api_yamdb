@@ -5,10 +5,10 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              TitlePostSerialzier, TitleSerializer,
                              UserSerializer, SignUpSerializer)
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
-                                           FilterSet, NumberFilter)
-from rest_framework import filters, mixins, permissions, viewsets, status,views
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
+from django_filters.rest_framework import (DjangoFilterBackend,)
+from rest_framework import filters, mixins, permissions, viewsets, status
+from api.filters import TitleFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated #IsAuthenticatedOrRegitadOnly
 from rest_framework.views import APIView
 from rest_framework.decorators import action, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
@@ -71,17 +71,6 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
-
-
-class TitleFilter(FilterSet):
-    name = CharFilter(field_name='name', lookup_expr='icontains')
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-    year = NumberFilter(field_name='year')
-
-    class Meta:
-        model = Title
-        fields = ('name', 'category', 'genre', 'year',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
