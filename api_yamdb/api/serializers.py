@@ -8,6 +8,8 @@ from users.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
     class Meta:
         model = User
         fields = ('username', 'email')
@@ -18,6 +20,14 @@ class SignUpSerializer(serializers.ModelSerializer):
                 'Имя пользователя "me" не разрешено.'
             )
         return value
+
+
+class TokenRegSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -65,6 +75,12 @@ class TitlePostSerialzier(serializers.ModelSerializer):
             )
         return value
 
+    # def validate_genre(self, value):
+    #     """Проверяет, что жанр есть в списке доступных"""
+    #     genre = Genre.objects.all()
+    #     if value not in genre:
+    #         raise serializers.ValidationError('Выберите жанр из списка')
+    #     return value
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
