@@ -16,7 +16,8 @@ from api.filters import TitleFilter
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitlePostSerialzier,
-                             TitleSerializer, UserSerializer, TokenRegSerializer)
+                             TitleSerializer, UserSerializer,
+                             TokenRegSerializer, UserEditSerializer)
 from .permissions import AdminPermission, AuthorPermission, UserOrAdmins
 
 
@@ -66,7 +67,11 @@ class UserViewSet(viewsets.ModelViewSet):
     #         serializer.save()
     #         return Response(serializer.data, status=status.HTTP_200_OK)
     #     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    @action(methods=['GET', 'PATCH'], detail=True, permission_classes=IsAuthenticated)
+    @action(
+        methods=['GET', 'PATCH'],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        serializer_class=UserEditSerializer)
     def me(self, request):
         user = request.user
         if request.method == 'GET':
@@ -75,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 serializer.data, status=status.HTTP_200_OK
             )
         if request.method == 'PATCH':
-            serializer = self.get.serializer(
+            serializer = self.get_serializer(
                 user,
                 data=request.data,
                 partial=True
