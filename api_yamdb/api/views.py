@@ -1,8 +1,3 @@
-from api.filters import TitleFilter
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             SignUpSerializer, TitlePostSerialzier,
-                             TitleSerializer, UserSerializer)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg, DecimalField
@@ -15,19 +10,21 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from api.filters import TitleFilter
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             SignUpSerializer, TitlePostSerialzier,
+                             TitleSerializer, UserSerializer, TokenRegSerializer)
 from .permissions import AdminPermission, AuthorPermission
 
 
 @permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
-        print(f'Посмотри, какой реквест: {self.request}')
         serializer = SignUpSerializer(data=request.data)
-        print(f'Посмотри, какой сериализатор: {serializer}')
         if serializer.is_valid():
             user = serializer.save()
-            print(f'Посмотри, пришел на поклон: {serializer}')
             code = default_token_generator.make_token(user)
             send_mail('Subject here', code,
                       '1@api.api', [request.data.get('email')]
@@ -36,21 +33,35 @@ class SignUpApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([AllowAny])
+class TokenRegApiView(APIView):
+    def post(self, request):
+        serializer = TokenRegSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.data.get('username')
+            user = get_object_or_404(User, username=username)
+            confirmation_code = serializer.data.get('confirmation_code')
+            if not default_token_generator.check_token(user, confirmation_code):
+                message = 'Вы использовали неправильный код или время действия окончено'
+                return Response({message}, status=status.HTTP_400_BAD_REQUEST)
+        token = RefreshToken.for_user(user)
+        return Response({'token': str(token.access_token)}, status=status.HTTP_200_OK)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AdminPermission, IsAuthenticated]
+    permission_classes = [AdminPermission]
     lookup_field = 'username'
 
-    @action(methods=['patch', 'get'], detail=True)
+    @action(methods=['patch', 'get'], detail=True, permission_classes=(IsAuthenticated,))
     def me(self, request):
-        # user = User.objects.filter(
-        #     username=request.user.username
-        # )
-        # user = self.get_object()
-        serializer = self.get_serializer(request.user)
-        serializer.save()
-        return serializer.data
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
