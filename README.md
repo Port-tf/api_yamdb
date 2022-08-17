@@ -1,7 +1,7 @@
 # YaMDb | REST API Service 
 
 ### Team:
-- Igor Skoda - @Port-tf (team-lead, developer) 
+- Igor Shkoda - @Port-tf (team-lead, developer) 
 
 - Vladislav Khizhnyak - @cortin34 (developer)
 

@@ -3,11 +3,13 @@ import datetime as dt
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
 from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = ('username', 'email')
@@ -20,6 +22,15 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
+class TokenRegSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -28,20 +39,30 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name', 'bio', 'role')
 
 
+class UserEditSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
+        read_only_fields = ('username', 'email', 'role')
+
+
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
 
 class TitlePostSerialzier(serializers.ModelSerializer):
-    """Сериайлайзер для POST, PUT, PATCH запросов"""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -57,20 +78,17 @@ class TitlePostSerialzier(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'genre', 'category', 'description')
 
     def validate_year(self, value):
-        """Проверяет год выхода произведения"""
         current_year = dt.date.today().year
         if (value > current_year):
             raise serializers.ValidationError(
-                'Год произведения не может быть больше текущего'
+                'Год произведения не может быть больше текущего.'
             )
         return value
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    """Сериайлайзер для всех запросов кроме POST, PUT, PATCH"""
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-
     rating = serializers.FloatField()
 
     class Meta:
@@ -87,7 +105,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        print(self.context)
         author = self.context.get('request').user
         title_id = self.context.get('view').kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
