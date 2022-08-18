@@ -1,9 +1,10 @@
 import datetime as dt
+
+from api_yamdb.settings import LIMIT_TEXT
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-
-from api_yamdb.settings import LIMIT_TEXT
 from users.models import User
 
 
@@ -82,7 +83,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
         ordering = ('name',)
         default_related_name = "genres"
-    
+
 
 class AbstractModelReviewComments(models.Model):
     """Абстрактная модель для Review и Comments."""
@@ -143,9 +144,8 @@ class Comments(AbstractModelReviewComments):
         verbose_name='Отзыв',
         related_name='comments'
     )
-    
+
     class Meta(AbstractModelReviewComments.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = "comments"
-
