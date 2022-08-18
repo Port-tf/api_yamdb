@@ -1,17 +1,18 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db.models import Avg, DecimalField
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 # from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import action, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filters import TitleFilter
-from .permissions import AdminPermission, AuthorPermission, UserOrAdmins
+from .permissions import (IsAdminOrReadOnly, IsAdmin,
+                          IsAuthorOrModeRatOrOrAdminOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitlePostSerialzier,
@@ -24,7 +25,7 @@ from users.models import User
 
 class AdminViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    permission_classes = (AdminPermission,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -34,13 +35,21 @@ class SignUpApiView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('email')
+            user, _ = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except ValueError:
+            return Response('Это имя уже занято', status.HTTP_400_BAD_REQUEST)
         code = default_token_generator.make_token(user)
         send_mail(
-            subject='Код токена',
-            message=f'Код для получения токена {code}',
-            from_email=DEFAULT_FROM_EMAIL,
-            recipient_list=[serializer.validated_data.get('email')]
+            'Код токена',
+            f'Код для получения токена {code}',
+            DEFAULT_FROM_EMAIL,
+            [serializer.validated_data.get('email')]
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -64,7 +73,7 @@ class TokenRegApiView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (UserOrAdmins,)
+    permission_classes = (IsAdmin,)
     lookup_field = 'username'
 
     @action(
@@ -95,9 +104,9 @@ class GenreViewSet(AdminViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__score', output_field=DecimalField()))
+        rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
-    permission_classes = (AdminPermission,)
+    permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
     ordering = ('name',)
 
@@ -109,7 +118,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorPermission,)
+    permission_classes = (IsAuthorOrModeRatOrOrAdminOrReadOnly,)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -123,7 +132,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (AuthorPermission,)
+    permission_classes = (IsAuthorOrModeRatOrOrAdminOrReadOnly,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))

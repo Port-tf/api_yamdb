@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
+from users.validators import username_me
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -15,11 +16,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
     def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не разрешено.'
-            )
-        return value
+        return username_me(value)
 
 
 class TokenRegSerializer(serializers.ModelSerializer):
