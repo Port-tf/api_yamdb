@@ -1,6 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db.models import Avg, DecimalField
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 # from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -35,13 +35,21 @@ class SignUpApiView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('email')
+            user, _ = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except ValueError:
+            return Response('Это имя уже занято', status.HTTP_400_BAD_REQUEST)
         code = default_token_generator.make_token(user)
         send_mail(
-            subject='Код токена',
-            message=f'Код для получения токена {code}',
-            from_email=DEFAULT_FROM_EMAIL,
-            recipient_list=[serializer.validated_data.get('email')]
+            'Код токена',
+            f'Код для получения токена {code}',
+            DEFAULT_FROM_EMAIL,
+            [serializer.validated_data.get('email')]
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -96,7 +104,7 @@ class GenreViewSet(AdminViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__score', output_field=DecimalField()))
+        rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
