@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg, DecimalField
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -25,27 +25,27 @@ from users.models import User
 
 class AdminViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    pass
+    permission_classes = (AdminPermission,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
-@permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            code = default_token_generator.make_token(user)
-            send_mail(
-                'Код для получения токена',
-                code,
-                DEFAULT_FROM_EMAIL,
-                [request.data.get('email')]
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код токена',
+            message=f'Код для получения токена {code}',
+            from_email=DEFAULT_FROM_EMAIL,
+            recipient_list=[serializer.validated_data.get('email')]
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@permission_classes([AllowAny])
 class TokenRegApiView(APIView):
     def post(self, request):
         serializer = TokenRegSerializer(data=request.data)
@@ -87,40 +87,25 @@ class UserViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(AdminViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class GenreViewSet(AdminViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score', output_field=DecimalField()))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             return TitlePostSerialzier
         return TitleSerializer
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        if self.request.method == 'GET':
-            queryset = queryset.annotate(
-                rating=Avg('reviews__score', output_field=DecimalField())
-            )
-        return queryset
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
