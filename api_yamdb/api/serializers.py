@@ -9,23 +9,17 @@ from users.models import User
 from users.validators import username_me
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('username', 'email')
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.RegexField(regex=r'^[\w.@+-]+\Z', required=True)
+    email = serializers.EmailField(required=True)
 
     def validate_username(self, value):
         return username_me(value)
 
 
-class TokenRegSerializer(serializers.ModelSerializer):
+class TokenRegSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
 
 
 class UserSerializer(serializers.ModelSerializer):
