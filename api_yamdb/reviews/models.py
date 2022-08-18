@@ -1,42 +1,67 @@
+import datetime as dt
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 
 from api_yamdb.settings import LIMIT_TEXT
 from users.models import User
 
 
-class Category(models.Model):
-    name = models.CharField('Имя категории', max_length=256)
-    slug = models.SlugField('Страница категории', unique=True, max_length=100)
+class AbstractModelGenreCategory(models.Model):
+    """Абстрактная модель для Genre и Category"""
+    name = models.CharField('Имя', max_length=256)
+    slug = models.SlugField('Slug', unique=True, max_length=100)
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        abstract = True
+        ordering = ['name']
 
-class Genre(models.Model):
-    name = models.CharField('Жанр', max_length=256)
-    slug = models.SlugField('Страница жанра', unique=True, max_length=100)
 
-    def __str__(self):
-        return self.name
+class Category(AbstractModelGenreCategory):
+    class Meta(AbstractModelGenreCategory.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        default_related_name = "categories"
+
+
+class Genre(AbstractModelGenreCategory):
+    class Meta(AbstractModelGenreCategory.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        default_related_name = "genres"
 
 
 class Title(models.Model):
     name = models.CharField('Название произведения', max_length=256)
-    year = models.IntegerField('Год выпуска')
+    year = models.PositiveSmallIntegerField(
+        'Год выпуска',
+        db_index=True,
+        validators=[MinValueValidator(
+                    limit_value=1,
+                    message="Год не может быть меньше или равен нулю"),
+                    MaxValueValidator(
+                    limit_value=dt.date.today().year,
+                    message="Год не может быть больше текущего")])
     description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField(
-        Genre, verbose_name='Жанры', related_name='titles')
+        Genre)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Категория',
-        related_name='titles'
     )
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        default_related_name = "genres"
 
 
 class Review(models.Model):
