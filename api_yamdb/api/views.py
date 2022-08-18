@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg, DecimalField
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -30,24 +30,21 @@ class AdminViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-@permission_classes([AllowAny])
 class SignUpApiView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            code = default_token_generator.make_token(user)
-            send_mail(
-                'Код для получения токена',
-                code,
-                DEFAULT_FROM_EMAIL,
-                [request.data.get('email')]
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код токена',
+            message=f'Код для получения токена {code}',
+            from_email=DEFAULT_FROM_EMAIL,
+            recipient_list=[serializer.validated_data.get('email')]
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@permission_classes([AllowAny])
 class TokenRegApiView(APIView):
     def post(self, request):
         serializer = TokenRegSerializer(data=request.data)
@@ -101,7 +98,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('reviews__score', output_field=DecimalField()))
     serializer_class = TitleSerializer
     permission_classes = (AdminPermission,)
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     ordering = ('name',)
 
