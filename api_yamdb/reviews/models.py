@@ -3,13 +3,13 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
-from api_yamdb.settings import LIMIT_TEXT
+from api_yamdb.settings import LIMIT_TEXT, LIMIT_SLUG, LIMIT_CHAT
 from users.models import User
 
 
 class AbstractModelGenreCategory(models.Model):
-    name = models.CharField('Имя', max_length=256)
-    slug = models.SlugField('Slug', unique=True, max_length=50)
+    name = models.CharField('Имя', max_length=LIMIT_CHAT)
+    slug = models.SlugField('Slug', unique=True, max_length=LIMIT_SLUG)
 
     class Meta:
         abstract = True
@@ -122,9 +122,3 @@ class Comments(AbstractModelReviewComment):
         verbose_name = 'Kомментарий'
         verbose_name_plural = 'комментария'
         default_related_name = 'comments'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'title'],
-                name='unique_author_title'
-            )
-        ]
