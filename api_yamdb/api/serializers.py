@@ -18,25 +18,21 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenRegSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
+    username = serializers.CharField(max_length=150, required=True)
+    confirmation_code = serializers.CharField(max_length=256, required=True)
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
+        abstract = True
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
 
 
-class UserEditSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'bio', 'role')
-        read_only_fields = ('username', 'email', 'role')
+class UserEditSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -105,22 +101,28 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
+    score = serializers.IntegerField()
 
     def validate(self, data):
-        author = self.context.get('request').user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
-        if (
-            self.context.get('request').method == 'POST'
-            and Review.objects.filter(title_id=title.id,
-                                      author=author).exists()
-        ):
-            raise ValidationError('Может существовать только один отзыв!')
+        if self.context.get('request').method == 'POST':
+            author = self.context.get('request').user
+            title_id = self.context.get('view').kwargs.get('title_id')
+            title = get_object_or_404(Title, id=title_id)
+            if Review.objects.filter(title_id=title.id,
+                                     author=author).exists():
+                raise ValidationError('Может существовать только один отзыв!')
         return data
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate_score(self, value):
+        if 1 > value > 10 and isinstance(value, int):
+            raise serializers.ValidationError(
+                'Оценка должна быть целым числом от 1 до 10'
+            )
+        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
