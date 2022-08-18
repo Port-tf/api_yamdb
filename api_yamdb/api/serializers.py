@@ -62,6 +62,21 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+    rating = serializers.IntegerField(default=0)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category',
+                  )
+        read_only_fields = ('id', 'name', 'year', 'rating',
+                            'description', 'genre', 'category',
+                            )
+
+
 class TitlePostSerialzier(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
@@ -72,10 +87,12 @@ class TitlePostSerialzier(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+    rating = serializers.IntegerField(required=False)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'genre', 'category', 'description')
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
 
     def validate_year(self, value):
         current_year = dt.date.today().year
@@ -85,17 +102,11 @@ class TitlePostSerialzier(serializers.ModelSerializer):
             )
         return value
 
-
-class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
-    rating = serializers.FloatField()
-
-    class Meta:
-        model = Title
-        fields = ('id', 'name', 'year', 'genre',
-                  'category', 'description', 'rating'
-                  )
+    def to_representation(self, instance):
+        """Изменяет отображение информации в ответе (response)
+         после POST запроса, в соответствии с ТЗ"""
+        serializer = TitleSerializer(instance)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):

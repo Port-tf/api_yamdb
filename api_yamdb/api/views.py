@@ -24,7 +24,10 @@ from users.models import User
 
 class AdminViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    pass
+    permission_classes = (AdminPermission,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 @permission_classes([AllowAny])
@@ -86,40 +89,26 @@ class UserViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(AdminViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (AdminPermission,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class GenreViewSet(AdminViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AdminPermission,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score', output_field=DecimalField()))
     serializer_class = TitleSerializer
     permission_classes = (AdminPermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             return TitlePostSerialzier
         return TitleSerializer
-
-    def get_queryset(self):
-        queryset = Title.objects.all()
-        if self.request.method == 'GET':
-            queryset = queryset.annotate(
-                rating=Avg('reviews__score', output_field=DecimalField())
-            )
-        return queryset
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
