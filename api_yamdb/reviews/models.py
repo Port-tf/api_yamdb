@@ -1,39 +1,67 @@
-from django.db import models
+import datetime as dt
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
+
+from api_yamdb.settings import LIMIT_TEXT
 from users.models import User
 
 
-class Category(models.Model):
-    name = models.CharField('Имя категории', max_length=256)
-    slug = models.SlugField('Страница категории', unique=True, max_length=50)
+class AbstractModelGenreCategory(models.Model):
+    """Абстрактная модель для Genre и Category"""
+    name = models.CharField('Имя', max_length=256)
+    slug = models.SlugField('Slug', unique=True, max_length=100)
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        abstract = True
+        ordering = ['name']
 
-class Genre(models.Model):
-    name = models.CharField('Жанр', max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
 
-    def __str__(self):
-        return self.name
+class Category(AbstractModelGenreCategory):
+    class Meta(AbstractModelGenreCategory.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        default_related_name = "categories"
+
+
+class Genre(AbstractModelGenreCategory):
+    class Meta(AbstractModelGenreCategory.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        default_related_name = "genres"
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=100)
-    year = models.IntegerField()
-    description = models.TextField(blank=True)
-    genre = models.ManyToManyField(Genre, related_name='titles')
+    name = models.CharField('Название произведения', max_length=256)
+    year = models.PositiveSmallIntegerField(
+        'Год выпуска',
+        db_index=True,
+        validators=[MinValueValidator(
+                    limit_value=1,
+                    message="Год не может быть меньше или равен нулю"),
+                    MaxValueValidator(
+                    limit_value=dt.date.today().year,
+                    message="Год не может быть больше текущего")])
+    description = models.TextField('Описание', blank=True)
+    genre = models.ManyToManyField(
+        Genre)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='titles'
     )
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        default_related_name = "genres"
 
 
 class Review(models.Model):
@@ -42,18 +70,21 @@ class Review(models.Model):
         help_text='Введите текст отзыва'
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        verbose_name='Пользователь',
         related_name='reviews'
     )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
+        verbose_name='Произведение',
         related_name='reviews'
     )
     score = models.IntegerField(
+        'Оценка',
         validators=[
             MinValueValidator(limit_value=1),
             MaxValueValidator(limit_value=10)
@@ -69,7 +100,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[LIMIT_TEXT]
 
 
 class Comments(models.Model):
@@ -81,13 +112,15 @@ class Comments(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        verbose_name='Пользователь',
         related_name='comments'
     )
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
+        verbose_name='Отзыв',
         related_name='comments'
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[LIMIT_TEXT]
