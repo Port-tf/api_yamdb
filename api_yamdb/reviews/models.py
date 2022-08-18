@@ -62,21 +62,28 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
         default_related_name = "genres"
+    
 
-
-class Review(models.Model):
-    text = models.TextField(
-        'Текст отзыва',
-        help_text='Введите текст отзыва'
-    )
+class AbstractModelReviewComments(models.Model):
+    """Абстрактная модель для Review и Comments."""
+    text = models.CharField(max_length=256)
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='reviews'
     )
+
+    def __str__(self):
+        return self.text[LIMIT_TEXT]
+
+    class Meta:
+        abstract = True
+        ordering = ['pub_date']
+
+
+class Review(AbstractModelReviewComments):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -91,7 +98,10 @@ class Review(models.Model):
         ],
     )
 
-    class Meta:
+    class Meta(AbstractModelReviewComments.Meta):
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        default_related_name = "reviews"
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -99,16 +109,8 @@ class Review(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.text[LIMIT_TEXT]
 
-
-class Comments(models.Model):
-    text = models.TextField(
-        verbose_name='Текст комментария',
-        help_text='Введите текст комментария'
-    )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+class Comments(AbstractModelReviewComments):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -121,6 +123,9 @@ class Comments(models.Model):
         verbose_name='Отзыв',
         related_name='comments'
     )
+    
+    class Meta(AbstractModelReviewComments.Meta):
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = "comments"
 
-    def __str__(self):
-        return self.text[LIMIT_TEXT]
