@@ -116,7 +116,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
-    ordering = ('name',)
+    filterset_fields = ('name',)
+    ordering_fields = ('name',)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
