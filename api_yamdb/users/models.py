@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from api_yamdb.settings import LIMIT_USERNAME, EMAIL_USERNAME
+from api_yamdb.settings import LIMIT_EMAIL, LIMIT_USERNAME
 from .validators import UsernameRegexValidator, username_me
 
 
@@ -35,10 +35,10 @@ class User(AbstractUser):
     role = models.CharField(
         'Роль пользователя',
         default=USER,
-        max_length=max(len(role[0]) for role in CHOICES_ROLE),
+        max_length=max(len(role) for role, _ in CHOICES_ROLE),
         choices=CHOICES_ROLE)
     email = models.EmailField('E-mail пользователя',
-                              unique=True, max_length=EMAIL_USERNAME)
+                              unique=True, max_length=LIMIT_EMAIL)
 
     @property
     def is_user(self):

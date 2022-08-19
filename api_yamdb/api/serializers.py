@@ -15,8 +15,8 @@ from users.validators import username_me
 
 
 class SignUpSerializer(serializers.Serializer):
-    username = serializers.RegexField(max_length=LIMIT_USERNAME,
-                                      regex=r'^[\w.@+-]+\Z', required=True)
+    username = serializers.RegexField(
+        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
     email = serializers.EmailField(required=True)
 
     def validate_username(self, value):
@@ -24,9 +24,13 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenRegSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=LIMIT_USERNAME, required=True)
+    username = serializers.RegexField(
+        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
     confirmation_code = serializers.CharField(max_length=LIMIT_CHAT,
                                               required=True)
+
+    def validate_username(self, value):
+        return username_me(value)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,7 +43,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserEditSerializer(UserSerializer):
+    username = serializers.RegexField(
+        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
     role = serializers.CharField(read_only=True)
+
+    def validate_username(self, value):
+        return username_me(value)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -59,7 +68,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.IntegerField(default=0)
+    rating = serializers.IntegerField(default=1)
 
     class Meta:
         model = Title
