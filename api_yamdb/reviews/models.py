@@ -1,12 +1,10 @@
-import datetime as dt
-
-from api_yamdb.settings import LIMIT_TEXT
+from api_yamdb.settings import LIMIT_CHAT, LIMIT_SLUG, LIMIT_TEXT
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from reviews.utilites import current_year
 
-from api_yamdb.settings import LIMIT_TEXT, LIMIT_SLUG, LIMIT_CHAT
 from users.models import User
 
 
@@ -58,7 +56,7 @@ class Genre(AbstractModelGenreCategory):
 
 
 class Title(models.Model):
-    name = models.CharField('Название произведения', max_length=256)
+    name = models.CharField('Название произведения', max_length=LIMIT_CHAT)
     year = models.PositiveSmallIntegerField(
         'Год выпуска',
         db_index=True,
@@ -66,7 +64,7 @@ class Title(models.Model):
                     limit_value=1,
                     message="Год не может быть меньше или равен нулю"),
                     MaxValueValidator(
-                    limit_value=dt.date.today().year,
+                    limit_value=current_year(),
                     message="Год не может быть больше текущего")])
     description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField(
@@ -84,7 +82,7 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
         ordering = ('name',)
-        default_related_name = "genres"
+        default_related_name = "titles"
 
 
 class AbstractModelReviewComments(models.Model):
@@ -116,8 +114,10 @@ class Review(AbstractModelReviewComments):
         'Оценка',
         default=1,
         validators=[
-            MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=10)
+            MinValueValidator(limit_value=1,
+                              message='Минимальное значение рейтинга - 1'),
+            MaxValueValidator(limit_value=10,
+                              message='Максимальное значение рейтинга - 10')
         ],
     )
 

@@ -1,9 +1,12 @@
 import datetime as dt
 
+from api_yamdb.settings import LIMIT_CHAT, LIMIT_USERNAME
+
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
+
 
 from reviews.models import Category, Comments, Genre, Review, Title
 
@@ -12,7 +15,8 @@ from users.validators import username_me
 
 
 class SignUpSerializer(serializers.Serializer):
-    username = serializers.RegexField(regex=r'^[\w.@+-]+\Z', required=True)
+    username = serializers.RegexField(max_length=LIMIT_USERNAME,
+                                      regex=r'^[\w.@+-]+\Z', required=True)
     email = serializers.EmailField(required=True)
 
     def validate_username(self, value):
@@ -20,8 +24,9 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenRegSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150, required=True)
-    confirmation_code = serializers.CharField(max_length=256, required=True)
+    username = serializers.CharField(max_length=LIMIT_USERNAME, required=True)
+    confirmation_code = serializers.CharField(max_length=LIMIT_CHAT,
+                                              required=True)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -94,8 +99,7 @@ class TitlePostSerialzier(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Изменяет отображение информации в ответе (response)
          после POST запроса, в соответствии с ТЗ"""
-        serializer = TitleSerializer(instance)
-        return serializer.data
+        return TitleSerializer(instance).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -103,7 +107,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    score = serializers.IntegerField()
+    score = serializers.IntegerField(min_value=1, max_value=10)
 
     def validate(self, data):
         if self.context.get('request').method == 'POST':
@@ -118,13 +122,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-
-    def validate_score(self, value):
-        if 1 > value > 10 and isinstance(value, int):
-            raise serializers.ValidationError(
-                'Оценка должна быть целым числом от 1 до 10'
-            )
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
