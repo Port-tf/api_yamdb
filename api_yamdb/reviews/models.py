@@ -25,7 +25,6 @@ class AbstractModelReviewComment(models.Model):
         help_text='Введите текст отзыва'
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -92,8 +91,7 @@ class AbstractModelReviewComments(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь',
-        related_name='reviews'
+        verbose_name='Пользователь'
     )
 
     def __str__(self):
@@ -101,7 +99,7 @@ class AbstractModelReviewComments(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['pub_date']
+        ordering = ('pub_date',)
 
 
 class Review(AbstractModelReviewComments):
