@@ -1,14 +1,15 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
 from django.db import models
 
-from api_yamdb.settings import LIMIT_CHAT, LIMIT_SLUG, LIMIT_TEXT
 from reviews.utilites import current_year
 from users.models import User
 
 
 class AbstractModelGenreCategory(models.Model):
-    name = models.CharField('Имя', max_length=LIMIT_CHAT)
-    slug = models.SlugField('Slug', unique=True, max_length=LIMIT_SLUG)
+    name = models.CharField('Имя', max_length=settings.LIMIT_CHAT)
+    slug = models.SlugField(
+        'Slug', unique=True, max_length=settings.LIMIT_SLUG)
 
     class Meta:
         abstract = True
@@ -36,7 +37,7 @@ class AbstractModelReviewComment(models.Model):
         ordering = ('pub_date',)
 
     def __str__(self):
-        return self.text[LIMIT_TEXT]
+        return self.text[settings.LIMIT_TEXT]
 
 
 class Category(AbstractModelGenreCategory):
@@ -54,15 +55,16 @@ class Genre(AbstractModelGenreCategory):
 
 
 class Title(models.Model):
-    name = models.CharField('Название произведения', max_length=LIMIT_CHAT)
+    name = models.CharField(
+        'Название произведения', max_length=settings.LIMIT_CHAT)
     year = models.PositiveSmallIntegerField(
         'Год выпуска',
         db_index=True,
         validators=[MinValueValidator(
-                    limit_value=1,
+                    limit_value=settings.MIN_LIMIT_VALUE,
                     message="Год не может быть меньше или равен нулю"),
                     MaxValueValidator(
-                    limit_value=current_year(),
+                    limit_value=current_year,
                     message="Год не может быть больше текущего")])
     description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField(
@@ -85,7 +87,7 @@ class Title(models.Model):
 
 class AbstractModelReviewComments(models.Model):
     """Абстрактная модель для Review и Comments."""
-    text = models.CharField(max_length=256)
+    text = models.CharField(max_length=settings.LIMIT_CHAT)
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     author = models.ForeignKey(
         User,
@@ -95,7 +97,7 @@ class AbstractModelReviewComments(models.Model):
     )
 
     def __str__(self):
-        return self.text[LIMIT_TEXT]
+        return self.text[settings.LIMIT_TEXT]
 
     class Meta:
         abstract = True
@@ -110,11 +112,11 @@ class Review(AbstractModelReviewComments):
     )
     score = models.PositiveSmallIntegerField(
         'Оценка',
-        default=1,
+        default=settings.MIN_LIMIT_VALUE,
         validators=[
-            MinValueValidator(limit_value=1,
+            MinValueValidator(limit_value=settings.MIN_LIMIT_VALUE,
                               message='Минимальное значение рейтинга - 1'),
-            MaxValueValidator(limit_value=10,
+            MaxValueValidator(limit_value=settings.MAX_LIMIT_VALUE,
                               message='Максимальное значение рейтинга - 10')
         ],
     )
@@ -132,17 +134,10 @@ class Review(AbstractModelReviewComments):
 
 
 class Comments(AbstractModelReviewComments):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь',
-        related_name='comments'
-    )
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
-        related_name='comments'
     )
 
     class Meta(AbstractModelReviewComments.Meta):

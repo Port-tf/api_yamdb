@@ -1,8 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from api_yamdb.settings import LIMIT_EMAIL, LIMIT_USERNAME
 from .validators import UsernameRegexValidator, username_me
 
 
@@ -19,7 +19,7 @@ class User(AbstractUser):
     username_validator = UsernameRegexValidator()
     username = models.CharField(
         'Логин',
-        max_length=LIMIT_USERNAME,
+        max_length=settings.LIMIT_USERNAME,
         unique=True,
         help_text=_(
             'Required. 150 characters or fewer. '
@@ -30,7 +30,8 @@ class User(AbstractUser):
             'unique': _("A user with that username already exists."),
         },
     )
-    first_name = models.CharField('Имя', max_length=LIMIT_USERNAME, blank=True)
+    first_name = models.CharField(
+        'Имя', max_length=settings.LIMIT_USERNAME, blank=True)
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'Роль пользователя',
@@ -38,7 +39,7 @@ class User(AbstractUser):
         max_length=max(len(role) for role, _ in CHOICES_ROLE),
         choices=CHOICES_ROLE)
     email = models.EmailField('E-mail пользователя',
-                              unique=True, max_length=LIMIT_EMAIL)
+                              unique=True, max_length=settings.LIMIT_EMAIL)
 
     @property
     def is_user(self):

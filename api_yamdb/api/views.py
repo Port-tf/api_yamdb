@@ -1,33 +1,28 @@
-from api.filters import TitleFilter
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             SignUpSerializer, TitlePostSerialzier,
-                             TitleSerializer, TokenRegSerializer,
-                             UserEditSerializer, UserSerializer)
-
-from api_yamdb.settings import DEFAULT_FROM_EMAIL
-
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, Review, Title
-
-from users.models import User
-
-
+from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsAuthorOrModeRatOrOrAdminOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          SignUpSerializer, TitlePostSerialzier,
+                          TitleSerializer, TokenRegSerializer,
+                          UserEditSerializer, UserSerializer)
+
+
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
 
 
 class AdminViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -56,7 +51,7 @@ class SignUpApiView(APIView):
         send_mail(
             'Код токена',
             f'Код для получения токена {code}',
-            DEFAULT_FROM_EMAIL,
+            settings.DEFAULT_FROM_EMAIL,
             [serializer.validated_data.get('email')]
         )
         return Response(serializer.data, status=status.HTTP_200_OK)

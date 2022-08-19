@@ -1,22 +1,19 @@
 import datetime as dt
 
-from api_yamdb.settings import LIMIT_CHAT, LIMIT_USERNAME
-
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
-
 from reviews.models import Category, Comments, Genre, Review, Title
-
 from users.models import User
 from users.validators import username_me
 
 
 class SignUpSerializer(serializers.Serializer):
-    username = serializers.RegexField(
-        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
+    username = serializers.RegexField(max_length=settings.LIMIT_USERNAME,
+                                      regex=r'^[\w.@+-]+\Z', required=True)
     email = serializers.EmailField(required=True)
 
     def validate_username(self, value):
@@ -24,9 +21,9 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenRegSerializer(serializers.Serializer):
-    username = serializers.RegexField(
-        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
-    confirmation_code = serializers.CharField(max_length=LIMIT_CHAT,
+    username = serializers.RegexField(max_length=settings.LIMIT_USERNAME,
+                                      regex=r'^[\w.@+-]+\Z', required=True)
+    confirmation_code = serializers.CharField(max_length=settings.LIMIT_CHAT,
                                               required=True)
 
     def validate_username(self, value):
@@ -34,6 +31,8 @@ class TokenRegSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(max_length=settings.LIMIT_USERNAME,
+                                      regex=r'^[\w.@+-]+\Z', required=True)
 
     class Meta:
         abstract = True
@@ -41,14 +40,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
 
-
-class UserEditSerializer(UserSerializer):
-    username = serializers.RegexField(
-        max_length=LIMIT_USERNAME, regex=r'^[\w.@+-]+\Z', required=True)
-    role = serializers.CharField(read_only=True)
-
     def validate_username(self, value):
         return username_me(value)
+
+
+class UserEditSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -116,7 +113,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    score = serializers.IntegerField(min_value=1, max_value=10)
+    score = serializers.IntegerField(validators=[
+        MinValueValidator(limit_value=settings.MIN_LIMIT_VALUE,
+                          message='Минимальное значение рейтинга - 1'),
+        MaxValueValidator(limit_value=settings.MAX_LIMIT_VALUE,
+                          message='Максимальное значение рейтинга - 10')
+    ])
 
     def validate(self, data):
         if self.context.get('request').method == 'POST':
