@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from api_yamdb.settings import LIMIT_USERNAME
 from .validators import UsernameRegexValidator, username_me
 
 CHOICES_ROLE = [
@@ -35,7 +36,7 @@ class User(AbstractUser):
             'unique': _("A user with that username already exists."),
         },
     )
-    first_name = models.CharField('Имя', max_length=150, blank=True)
+    first_name = models.CharField('Имя', max_length=LIMIT_USERNAME, blank=True)
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'Роль пользователя',
