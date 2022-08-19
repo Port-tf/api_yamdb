@@ -2,14 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from api_yamdb.settings import LIMIT_USERNAME
+from api_yamdb.settings import LIMIT_USERNAME, EMAIL_USERNAME
 from .validators import UsernameRegexValidator, username_me
-
-CHOICES_ROLE = [
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор')
-]
 
 
 class User(AbstractUser):
@@ -25,7 +19,7 @@ class User(AbstractUser):
     username_validator = UsernameRegexValidator()
     username = models.CharField(
         'Логин',
-        max_length=150,
+        max_length=LIMIT_USERNAME,
         unique=True,
         help_text=_(
             'Required. 150 characters or fewer. '
@@ -43,7 +37,8 @@ class User(AbstractUser):
         default=USER,
         max_length=max(len(role[0]) for role in CHOICES_ROLE),
         choices=CHOICES_ROLE)
-    email = models.EmailField('E-mail пользователя', unique=True)
+    email = models.EmailField('E-mail пользователя',
+                              unique=True, max_length=EMAIL_USERNAME)
 
     @property
     def is_user(self):
