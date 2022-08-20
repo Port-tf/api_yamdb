@@ -77,6 +77,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
     lookup_field = 'username'
 
     @action(
@@ -112,7 +113,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
     filterset_fields = ('name',)
-    ordering_fields = ('name',)
+    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:

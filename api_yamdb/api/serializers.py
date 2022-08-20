@@ -41,6 +41,13 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name', 'bio', 'role')
 
     def validate_username(self, value):
+        if (
+            self.context.get('request').method == 'POST'
+            and User.objects.filter(username=value).exists()
+        ):
+            raise ValidationError(
+                'Пользователь с таким именем уже существует.'
+            )
         return username_me(value)
 
 
